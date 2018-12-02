@@ -22,3 +22,16 @@ If you want to change the default file on which image segmentation will be done 
 End Note - This project is heavily inspired by pyimagesearch course of computer vision to do document segmentation and OCR.
 
 I will soon be building my own YOLO classifier which segments document using Neural Networks.
+
+# OCR
+
+To install tesseract, run :
+
+sudo apt-get install tesseract-ocr
+
+If you want to do Optical Character Recognition on the extracted image, then go to the output folder, open terminal and run:
+
+tesseract image_name out
+The output will be saved in a file named out.txt
+
+
