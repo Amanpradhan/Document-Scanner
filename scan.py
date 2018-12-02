@@ -1,12 +1,3 @@
-# USAGE:
-# python scan.py (--images <IMG_DIR> | --image <IMG_PATH>) [-i]
-# For example, to scan a single image with interactive mode:
-# python scan.py --image sample_images/desk.JPG -i
-# To scan all images in a directory automatically:
-# python scan.py --images sample_images
-
-# Scanned images will be output to directory named 'output'
-
 from pyimagesearch import transform
 from pyimagesearch import imutils
 from scipy.spatial import distance as dist
@@ -25,22 +16,12 @@ class DocScanner():
     """An image scanner"""
 
     def __init__(self, interactive=False, MIN_QUAD_AREA_RATIO=0.25, MAX_QUAD_ANGLE_RANGE=40):
-        """
-        Args:
-            interactive (boolean): If True, user can adjust screen contour before
-                transformation occurs in interactive pyplot window.
-            MIN_QUAD_AREA_RATIO (float): A contour will be rejected if its corners 
-                do not form a quadrilateral that covers at least MIN_QUAD_AREA_RATIO 
-                of the original image. Defaults to 0.25.
-            MAX_QUAD_ANGLE_RANGE (int):  A contour will also be rejected if the range 
-                of its interior angles exceeds MAX_QUAD_ANGLE_RANGE. Defaults to 40.
-        """        
+              
         self.interactive = interactive
         self.MIN_QUAD_AREA_RATIO = MIN_QUAD_AREA_RATIO
         self.MAX_QUAD_ANGLE_RANGE = MAX_QUAD_ANGLE_RANGE        
 
     def filter_corners(self, corners, min_dist=20):
-        """Filters corners that are within min_dist of others"""
         def predicate(representatives, corner):
             return all(dist.euclidean(representative, corner) >= min_dist
                        for representative in representatives)
@@ -57,10 +38,7 @@ class DocScanner():
             math.acos(np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))))
 
     def get_angle(self, p1, p2, p3):
-        """
-        Returns the angle between the line segment from p2 to p1 
-        and the line segment from p2 to p3 in degrees
-        """
+        
         a = np.radians(np.array(p1))
         b = np.radians(np.array(p2))
         c = np.radians(np.array(p3))
@@ -71,11 +49,7 @@ class DocScanner():
         return self.angle_between_vectors_degrees(avec, cvec)
 
     def angle_range(self, quad):
-        """
-        Returns the range between max and min interior angles of quadrilateral.
-        The input quadrilateral must be a numpy array with vertices ordered clockwise
-        starting with the top left vertex.
-        """
+        
         tl, tr, br, bl = quad
         ura = self.get_angle(tl[0], tr[0], br[0])
         ula = self.get_angle(bl[0], tl[0], tr[0])
@@ -86,12 +60,7 @@ class DocScanner():
         return np.ptp(angles)          
 
     def get_corners(self, img):
-        """
-        Returns a list of corners ((x, y) tuples) found in the input image. With proper
-        pre-processing and filtering, it should output at most 10 potential corners.
-        This is a utility function used by get_contours. The input image is expected 
-        to be rescaled and Canny filtered prior to be passed in.
-        """
+        
         lsd = cv2.createLineSegmentDetector()
         lines = lsd.detect(img)[0]
 
@@ -138,7 +107,7 @@ class DocScanner():
                 corners.append((min_x, left_y))
                 corners.append((max_x, right_y))
 
-            # find the vertical lines (connected-components -> bounding boxes -> final lines)
+            
             contours = cv2.findContours(vertical_lines_canvas, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             contours = contours[1]
             contours = sorted(contours, key=lambda c: cv2.arcLength(c, True), reverse=True)[:2]
@@ -154,31 +123,23 @@ class DocScanner():
                 corners.append((top_x, min_y))
                 corners.append((bottom_x, max_y))
 
-            # find the corners
+            # finding the corners from the image
             corners_y, corners_x = np.where(horizontal_lines_canvas + vertical_lines_canvas == 2)
             corners += zip(corners_x, corners_y)
 
-        # remove corners in close proximity
+        # removing corners in close proximity
         corners = self.filter_corners(corners)
         return corners
 
     def is_valid_contour(self, cnt, IM_WIDTH, IM_HEIGHT):
-        """Returns True if the contour satisfies all requirements set at instantitation"""
+        
 
         return (len(cnt) == 4 and cv2.contourArea(cnt) > IM_WIDTH * IM_HEIGHT * self.MIN_QUAD_AREA_RATIO 
             and self.angle_range(cnt) < self.MAX_QUAD_ANGLE_RANGE)
 
 
     def get_contour(self, rescaled_image):
-        """
-        Returns a numpy array of shape (4, 2) containing the vertices of the four corners
-        of the document in the image. It considers the corners returned from get_corners()
-        and uses heuristics to choose the four corners that most likely represent
-        the corners of the document. If no corners were found, or the four corners represent
-        a quadrilateral that is too small or convex, it returns the original four corners.
-        """
-
-        # these constants are carefully chosen
+        
         MORPH = 9
         CANNY = 84
         HOUGH = 25
@@ -220,10 +181,19 @@ class DocScanner():
             # for debugging: uncomment the code below to draw the corners and countour found 
             # by get_corners() and overlay it on the image
 
+            # for apx in approx:
+                # cv2.drawContours(rescaled_image, apx, -1, (20, 20, 255), 2)
+            cv2.drawContours(rescaled_image, [approx], -1, (20, 20, 255), 2)
+            plt.figure()
+            plt.imshow(rescaled_image)  
+            plt.show()  
+
+            # print([approx])
             # cv2.drawContours(rescaled_image, [approx], -1, (20, 20, 255), 2)
             # plt.scatter(*zip(*test_corners))
             # plt.imshow(rescaled_image)
             # plt.show()
+            # cv2.rectangle(rescaled_image, )
 
         # also attempt to find contours directly from the edged image, which occasionally 
         # produces better results
