@@ -12,7 +12,7 @@ It involves 3 steps:
 
 How to use it:
 
-1. pip install requirements.txt 
+1. pip install -r requirements.txt 
 2. run python scan.py
 3. after that, paste the path of the image you want to do image segmentation on.
 
