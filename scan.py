@@ -188,13 +188,7 @@ class DocScanner():
             plt.imshow(rescaled_image)  
             plt.show()  
 
-            # print([approx])
-            # cv2.drawContours(rescaled_image, [approx], -1, (20, 20, 255), 2)
-            # plt.scatter(*zip(*test_corners))
-            # plt.imshow(rescaled_image)
-            # plt.show()
-            # cv2.rectangle(rescaled_image, )
-
+            
         # also attempt to find contours directly from the edged image, which occasionally 
         # produces better results
         (_, cnts, hierarchy) = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
